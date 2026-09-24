@@ -121,7 +121,7 @@
         <div class="space-y-1 text-sm text-slate-300 leading-relaxed">
           <h2 class="font-bold text-white text-base">Założenia modelu</h2>
           <p>
-            Kalkulator zakłada zakup mieszkania w Polsce, kredyt hipoteczny z ratami równymi, najem prywatny. Model zawiera uproszczenia: dla obliczeń rentowności przyjmuje zerowy cashflow z najmu (czynsz pokrywa tylko ratę i koszty bieżące), rata i czynsz oraz koszty są stałe w czasie, a wartość mieszkania rośnie co roku o stały, wybrany procent.
+            Kalkulator zakłada zakup mieszkania w Polsce, kredyt hipoteczny z ratami równymi, najem prywatny. Model zawiera uproszczenia: dla obliczeń rentowności przyjmuje zerowy cashflow z najmu (czynsz pokrywa ratę i koszty bieżące, a nadwyżki są ignorowane), rata nie zmienia się w czasie, a wartość mieszkania rośnie co roku o stały, wybrany procent.
           </p>
         </div>
       </div>
@@ -567,6 +567,9 @@
             </li>
             <li>
               <strong class="text-slate-300">Nie wszystkie koszty są uwzględnione.</strong> Kalkulator nie wycenia m.in. czasu właściciela, większych remontów ani kosztów ewentualnej sprzedaży.
+            </li>
+            <li>
+              <strong class="text-slate-300">Utrzymanie zwrotu.</strong> Utrzymanie rentowności przez cały okres inwestycji zakłada waloryzację czynszu oraz kosztów na poziomie wzrostu wartości nieruchomości.
             </li>
             <li>
               <strong class="text-slate-300">Porównanie z ETF-em i lokatą jest orientacyjne.</strong> To różne inwestycje, a ich rzeczywiste wyniki, ryzyko i podatki mogą być inne niż w modelu.
@@ -1179,9 +1182,9 @@
           } else {
             const appRateFormatted = (appRate % 1 === 0 ? appRate : appRate.toFixed(1)).toString().replace('.', ',');
             if (includeAppreciation) {
-              roiExpl.innerHTML = `Roczny dochód netto z najmu przed ratą to <strong>${formatPLNStr(Math.round(annualNet))} zł</strong>, co w stosunku do ceny zakupu i kosztów początkowych (<strong>${formatPLNStr(Math.round(costBasis))} zł</strong>) wynosi <strong>${yieldReturn.toFixed(2).replace('.', ',')}%</strong>, a po uwzględnieniu wzrostu wartości nieruchomości (<strong>${appRateFormatted}%</strong>) daje <strong>${activeRoiReturn.toFixed(2).replace('.', ',')}%</strong>. Żeby lokata lub obligacje dawały taki wynik, musiałyby oferować <strong>${roiBruttoReturn.toFixed(2).replace('.', ',')}%</strong> rocznie przed opodatkowaniem.`;
+              roiExpl.innerHTML = `Roczny dochód netto z najmu przed ratą to <strong>${formatPLNStr(Math.round(annualNet))} zł</strong>, co w stosunku do ceny zakupu i kosztów początkowych (<strong>${formatPLNStr(Math.round(costBasis))} zł</strong>) wynosi <strong>${yieldReturn.toFixed(2).replace('.', ',')}%</strong>, a po uwzględnieniu wzrostu wartości nieruchomości (<strong>${appRateFormatted}%</strong>) daje <strong>${activeRoiReturn.toFixed(2).replace('.', ',')}%</strong>. Żeby lokata lub obligacje dawały taki wynik, musiałyby wypłacać <strong>${roiBruttoReturn.toFixed(2).replace('.', ',')}%</strong> rocznie przed opodatkowaniem.`;
             } else {
-              roiExpl.innerHTML = `Roczny dochód netto z najmu przed ratą to <strong>${formatPLNStr(Math.round(annualNet))} zł</strong>, co w stosunku do ceny zakupu i kosztów początkowych (<strong>${formatPLNStr(Math.round(costBasis))} zł</strong>) wynosi <strong>${activeRoiReturn.toFixed(2).replace('.', ',')}%</strong>. Żeby lokata lub obligacje dawały taki wynik, musiałyby oferować <strong>${roiBruttoReturn.toFixed(2).replace('.', ',')}%</strong> rocznie przed opodatkowaniem.`;
+              roiExpl.innerHTML = `Roczny dochód netto z najmu przed ratą to <strong>${formatPLNStr(Math.round(annualNet))} zł</strong>, co w stosunku do ceny zakupu i kosztów początkowych (<strong>${formatPLNStr(Math.round(costBasis))} zł</strong>) wynosi <strong>${activeRoiReturn.toFixed(2).replace('.', ',')}%</strong>. Żeby lokata lub obligacje dawały taki wynik, musiałyby wypłacać <strong>${roiBruttoReturn.toFixed(2).replace('.', ',')}%</strong> rocznie przed opodatkowaniem.`;
             }
           }
         }
