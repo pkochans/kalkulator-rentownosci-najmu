@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Rentowności Najmu</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      touch-action: pan-y;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      margin-top: -6px;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+      transition: all 0.2s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #60a5fa;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 8px;
+      cursor: pointer;
+      background: #334155;
+      border-radius: 4px;
+    }
+    input[type=range]::-moz-range-thumb {
+      height: 20px;
+      width: 20px;
+      border: none;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+      transition: all 0.2s ease;
+    }
+    input[type=range]::-moz-range-thumb:hover {
+      transform: scale(1.15);
+      background: #60a5fa;
+    }
+    input[type=range]::-moz-range-track {
+      width: 100%;
+      height: 8px;
+      cursor: pointer;
+      background: #334155;
+      border-radius: 4px;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-12 pt-6 px-4 sm:px-6 lg:px-8">
+
+  <div class="max-w-5xl mx-auto space-y-6">
+    <header class="pb-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex flex-wrap items-baseline gap-2.5">
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+          Kalkulator Rentowności Najmu
+        </h1>
+        <span class="text-slate-400 text-sm font-medium">Mieszkanie czy Giełda?</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="saveState()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-sm font-medium rounded-lg border border-slate-700 transition shadow-sm" aria-label="Zapisz parametry">
+          Zapisz parametry
+        </button>
+      </div>
+    </header>
+
+    <!-- Toast powiadomienie -->
+    <div id="saveStatus" class="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 bg-slate-900/95 border border-emerald-500/40 text-emerald-400 text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md opacity-0 translate-y-3 pointer-events-none transition-all duration-300 ease-out">
+      <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+      <span>Zapisano lokalnie (tylko w tej przeglądarce)</span>
+    </div>
+
+    <!-- PANEL: Założenia modelu -->
+    <div class="glass-card rounded-2xl p-4 sm:p-5 border-l-4 border-l-blue-500 bg-slate-800/80">
+      <div class="flex items-start gap-3">
+        <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400 shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="space-y-1 text-sm text-slate-300 leading-relaxed">
+          <h2 class="font-bold text-white text-base">Założenia modelu</h2>
+          <p>
+            Kalkulator zakłada zakup mieszkania w Polsce, kredyt hipoteczny z ratami równymi, najem prywatny. Model zawiera uproszczenia: dla obliczeń rentowności przyjmuje zerowy cashflow z najmu (czynsz pokrywa tylko ratę i koszty bieżące), rata i czynsz oraz koszty są stałe w czasie, a wartość mieszkania rośnie co roku o stały, wybrany procent.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <div class="lg:col-span-6 space-y-5">
+        <div class="glass-card rounded-2xl p-5 space-y-6">
+          
+          <!-- Cena -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm">
+              <label for="priceInput" class="font-medium text-slate-300">Cena nieruchomości</label>
+            </div>
+            <div class="relative">
+              <input type="text" id="priceInput" value="750 000" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-3.5 pr-14 py-2.5 text-white font-semibold text-base focus:outline-none focus:border-blue-500 transition" aria-label="Cena nieruchomości">
+              <span class="absolute right-3.5 top-3 text-slate-400 text-sm font-medium pointer-events-none">zł</span>
+            </div>
+            <input type="range" id="priceRange" min="100000" max="2000000" step="10000" value="750000" class="w-full mt-2" aria-label="Suwak ceny nieruchomości">
+          </div>
+
+          <!-- Koszty początkowe -->
+          <div class="space-y-3 pt-3 border-t border-slate-800/60">
+            <h3 class="text-sm font-medium text-slate-300">Koszty początkowe</h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              
+              <!-- Podatek PCC -->
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-1">
+                <div class="flex justify-between items-center text-xs mb-1">
+                  <label class="font-medium text-slate-300">PCC (2%)</label>
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <span class="text-[11px] text-slate-400">Zwolniony</span>
+                    <input type="checkbox" id="pccExemptToggle" onchange="togglePccExempt()" class="sr-only peer" aria-label="Zwolnienie z PCC">
+                    <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600 relative"></div>
+                  </label>
+                </div>
+                <div class="text-lg font-bold text-white" id="pccValueDisplay">
+                  15 000 zł
+                </div>
+                <div class="text-[10px] text-slate-400 leading-tight">
+                  Pierwsze mieszkanie często jest zwolnione. Od dewelopera: bez PCC.
+                </div>
+              </div>
+
+              <!-- Koszty notarialne -->
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <label class="font-medium text-slate-300">Koszty notarialne</label>
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <span class="text-[11px] text-slate-400">Wylicz</span>
+                    <input type="checkbox" id="notaryAutoToggle" checked onchange="toggleNotaryAuto()" class="sr-only peer" aria-label="Automatyczne wyliczanie kosztów notarialnych">
+                    <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600 relative"></div>
+                  </label>
+                </div>
+                <div class="relative">
+                  <input type="text" id="costNotaryInput" readonly class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition read-only:bg-slate-900/80 read-only:text-slate-300" aria-label="Koszty notarialne">
+                  <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">zł</span>
+                </div>
+                <div class="text-[10px] text-slate-400 leading-tight">
+                  50% taksy maks. + VAT, wpisy do KW.
+                </div>
+              </div>
+
+              <!-- Prowizja pośrednika -->
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <label class="font-medium text-slate-400">Prowizja pośrednika (brutto)</label>
+                  <div class="inline-flex rounded bg-slate-900 p-0.5 border border-slate-700 text-[10px]">
+                    <button type="button" id="toggleAgentPct" onclick="setCostMode('agent', 'pct')" class="px-1.5 py-0.5 rounded font-medium text-white bg-blue-600 transition" aria-label="Prowizja pośrednika w procentach">%</button>
+                    <button type="button" id="toggleAgentPln" onclick="setCostMode('agent', 'pln')" class="px-1.5 py-0.5 rounded font-medium text-slate-400 hover:text-white transition" aria-label="Prowizja pośrednika w złotówkach">zł</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <input type="text" id="costAgentInput" value="2,5" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Wartość prowizji pośrednika">
+                  <span id="agentUnitSuffix" class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">%</span>
+                </div>
+                <input type="range" id="costAgentRange" min="0" max="5" step="0.1" value="2.5" class="w-full mt-1" aria-label="Suwak prowizji pośrednika">
+              </div>
+
+              <!-- Remont i wyposażenie -->
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <label class="font-medium text-slate-400">Remont, wyposażenie, wycena, inne</label>
+                </div>
+                <div class="relative">
+                  <input type="text" id="costRehabInput" value="10 000" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Koszty remontu i wyposażenia">
+                  <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">zł</span>
+                </div>
+                <input type="range" id="costRehabRange" min="0" max="100000" step="1000" value="10000" class="w-full mt-1" aria-label="Suwak kosztów remontu">
+                <div class="text-[10px] text-slate-400 leading-tight">
+                  Gotówka wyłożona z własnej kieszeni.
+                </div>
+              </div>
+
+            </div>
+            
+            <!-- SUMA ZAINWESTOWANEJ GOTÓWKI -->
+            <div class="p-3 mt-3 rounded-xl bg-slate-800/50 border border-slate-700 flex justify-between items-center">
+              <div>
+                <span class="text-sm font-medium text-slate-300 block">Suma zainwestowanej gotówki:</span>
+                <span id="summaryInitialCostsSubtext" class="text-[11px] text-slate-400 block"></span>
+              </div>
+              <span id="summaryInitialCosts" class="text-base font-semibold text-white">0 zł</span>
+            </div>
+          </div>
+
+          <!-- Parametry kredytu -->
+          <div class="space-y-3 pt-3 border-t border-slate-800/60">
+            <h3 class="text-sm font-medium text-slate-300">Parametry kredytu</h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Wkład Własny -->
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <label class="font-medium text-slate-400">Wkład własny</label>
+                  <div class="inline-flex rounded bg-slate-900 p-0.5 border border-slate-700 text-[10px]">
+                    <button type="button" id="toggleDpPct" onclick="setCostMode('dp', 'pct')" class="px-1.5 py-0.5 rounded font-medium text-white bg-blue-600 transition" aria-label="Wkład własny w procentach">%</button>
+                    <button type="button" id="toggleDpPln" onclick="setCostMode('dp', 'pln')" class="px-1.5 py-0.5 rounded font-medium text-slate-400 hover:text-white transition" aria-label="Wkład własny w złotówkach">zł</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <input type="text" id="costDpInput" value="20" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Wartość wkładu własnego">
+                  <span id="dpUnitSuffix" class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">%</span>
+                </div>
+                <input type="range" id="costDpRange" min="0" max="100" step="1" value="20" class="w-full mt-1" aria-label="Suwak wkładu własnego">
+              </div>
+
+              <!-- Okres kredytowania -->
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <label class="font-medium text-slate-400">Okres kredytowania</label>
+                </div>
+                <div class="relative">
+                  <input type="text" id="termInput" value="25" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Okres kredytowania">
+                  <span id="termUnitSuffix" class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">lat</span>
+                </div>
+                <input type="range" id="termRange" min="5" max="35" step="1" value="25" class="w-full mt-1" aria-label="Suwak okresu kredytowania">
+              </div>
+
+              <!-- Oprocentowanie -->
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <label class="font-medium text-slate-400">Oprocentowanie kredytu</label>
+                </div>
+                <div class="relative">
+                  <input type="text" id="interestInput" value="5,5" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-8 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Oprocentowanie kredytu">
+                  <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">%</span>
+                </div>
+                <input type="range" id="interestRange" min="0" max="15" step="0.1" value="5.5" class="w-full mt-1" aria-label="Suwak oprocentowania">
+              </div>
+
+              <!-- Rata kredytu -->
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-1 flex flex-col justify-between">
+                <div>
+                  <div class="flex justify-between items-center text-xs mb-1">
+                    <label class="font-medium text-slate-300">Rata kredytu</label>
+                  </div>
+                  <div class="text-xl font-bold text-white">
+                    <span id="loanInstallmentDisplay">0</span> zł/mc
+                  </div>
+                </div>
+                <div class="text-[10px] text-slate-400 leading-tight pt-1">
+                  Przy wymaganym ubezpieczeniu kredytu wlicz jego koszt w oprocentowanie.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parametry wynajmu -->
+          <div class="space-y-4 pt-3 border-t border-slate-800/60">
+            <h3 class="text-sm font-medium text-slate-300">Parametry wynajmu</h3>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Czynsz najmu</label>
+                <div class="relative">
+                  <input type="text" id="advRent" value="4 600" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-16 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Miesięczny czynsz najmu">
+                  <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">zł/mc</span>
+                </div>
+                <input type="range" id="advRentRange" min="1000" max="7000" step="100" value="4600" class="w-full mt-2" aria-label="Suwak czynszu">
+                <div class="text-[10px] text-slate-400 mt-1 leading-tight">
+                  Pobierany od najemców, nie uwzględnia opłat eksploatacyjnych.
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Pustostan</label>
+                <div class="relative">
+                  <input type="text" id="advVacancy" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-16 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Pustostan w miesiącach">
+                  <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">mc/rok</span>
+                </div>
+                <input type="range" id="advVacancyRange" min="0" max="12" step="0.5" value="1" class="w-full mt-2" aria-label="Suwak pustostanu">
+                <div class="text-[10px] text-slate-400 mt-1 leading-tight">
+                  W pustostanie właściciel sam płaci opłaty eksploatacyjne. Uwzględnij to w rezerwie.
+                </div>
+              </div>
+
+              <div class="col-span-2 sm:col-span-1">
+                <label class="block text-xs text-slate-400 mb-1">Podatek od najmu</label>
+                <div class="relative">
+                  <input type="text" id="advTax" value="8,5" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-8 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Stawka podatku od najmu">
+                  <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">%</span>
+                </div>
+                <input type="range" id="advTaxRange" min="0" max="20" step="0.5" value="8.5" class="w-full mt-2" aria-label="Suwak podatku">
+                <div class="text-[10px] text-slate-400 mt-1.5 leading-tight">
+                  Ryczałt: 8,5% do progu (zazwyczaj 100 tys. zł), potem 12,5% od nadwyżki.
+                </div>
+              </div>
+
+              <div class="col-span-2 sm:col-span-1">
+                <label class="block text-xs text-slate-400 mb-1">Fundusz rezerwowy</label>
+                <div class="relative">
+                  <input type="text" id="advFund" value="150" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-16 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Fundusz rezerwowy">
+                  <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">zł/mc</span>
+                </div>
+                <input type="range" id="advFundRange" min="0" max="500" step="10" value="150" class="w-full mt-2" aria-label="Suwak funduszu rezerwowego">
+                <div class="text-[10px] text-slate-400 mt-1.5 leading-tight">
+                  Przeznaczony na naprawy awarii, wymianę sprzętów, składki ubezpieczenia, itp.
+                </div>
+              </div>
+            </div>
+
+            <!-- Dochód z najmu netto -->
+            <div id="netIncomeContainer" class="p-4 sm:p-5 rounded-xl bg-slate-800/50 border border-slate-700 mt-4 transition-colors">
+              <div class="flex justify-between items-center mb-1">
+                <label class="font-medium text-slate-200 text-sm sm:text-base">Dochód z najmu netto</label>
+                <div class="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-700 text-xs">
+                  <button type="button" id="toggleIncomeMo" onclick="setIncomeMode('mo')" class="px-2 py-0.5 rounded-md font-medium text-white bg-blue-600 transition" aria-label="Wyświetl miesięcznie">mc</button>
+                  <button type="button" id="toggleIncomeYr" onclick="setIncomeMode('yr')" class="px-2 py-0.5 rounded-md font-medium text-slate-400 hover:text-white transition" aria-label="Wyświetl rocznie">rok</button>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                <!-- 1. Dochód przed ratą -->
+                <div class="flex flex-col gap-0.5">
+                  <span class="text-[11px] text-slate-400 font-medium">Przed ratą</span>
+                  <div class="flex items-baseline gap-2 pt-0.5">
+                    <span id="incomeDisplay" class="text-3xl font-extrabold text-emerald-400 tracking-tight">0</span>
+                    <span id="incomeUnitSuffix" class="text-slate-400 text-sm font-medium">zł / mc</span>
+                  </div>
+                </div>
+
+                <!-- 2. Nadwyżka po racie -->
+                <div class="flex flex-col gap-0.5 sm:items-end">
+                  <span class="block text-[11px] text-slate-400 font-medium">Nadwyżka po racie</span>
+                  <div class="flex items-center gap-2 flex-wrap sm:justify-end">
+                    <span id="marginDisplay" class="text-xl font-bold text-emerald-400 tracking-tight">0 zł</span>
+                    <span id="marginPctDisplay" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold tracking-wide">0%</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="incomeInfoBox" class="text-[11px] text-emerald-300/90 flex items-start gap-1.5 leading-relaxed bg-emerald-500/10 p-2.5 rounded-lg border border-emerald-500/20 mt-2">
+                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                <span id="incomeInfoText">Dobierz kredyt tak, aby wychodzić trochę nad zero nawet przy wyższych stopach i niższym czynszu. Nadwyżka nie jest wliczana do zysku.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Output Metrics -->
+      <div class="lg:col-span-6 space-y-4">
+        
+        <!-- Tile 1: Wartość mieszkania po okresie inwestycji + Roczny wzrost -->
+        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-700 space-y-3 relative overflow-hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="space-y-1">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+                Wartość mieszkania po spłacie (<span id="futureValTermDisplay">25 lat</span>)
+              </span>
+              <div class="text-xl sm:text-2xl font-extrabold text-white tracking-tight" id="futurePriceDisplay">
+                0 zł
+              </div>
+            </div>
+
+            <!-- Suwak wzrostu wartości -->
+            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80 space-y-1.5 w-full sm:w-1/2 shrink-0">
+              <div class="flex justify-between items-center text-xs gap-2">
+                <label for="appreciationInput" class="font-medium text-slate-300">Wzrost wartości</label>
+                <div class="relative shrink-0">
+                  <input type="text" id="appreciationInput" value="2,00" class="w-24 bg-slate-900 border border-slate-700 rounded-lg pl-2 pr-[49px] py-0.5 text-right text-white font-semibold text-xs focus:outline-none focus:border-blue-500 transition" aria-label="Przewidywany wzrost wartości nieruchomości">
+                  <span class="absolute right-2 top-0.5 text-slate-400 text-[11px] font-medium pointer-events-none">% / rok</span>
+                </div>
+              </div>
+              <input type="range" id="appreciationRange" min="0" max="10" step="0.1" value="2.0" class="w-full" aria-label="Suwak przewidywanego wzrostu wartości">
+              <div class="text-[10px] text-slate-400 leading-tight pt-1">
+                Często zakładany na poziomie inflacji.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tile 2: Zysk po całym okresie -->
+        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-700 space-y-3 relative overflow-hidden">
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+              Zysk po całym okresie (<span id="profitTermDisplay" class="text-slate-200">25 lat</span>)
+            </span>
+            <div id="summaryTotalProfit" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+              0 zł
+            </div>
+          </div>
+
+          <!-- Co to znaczy? -->
+          <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-1 text-xs">
+            <span class="font-semibold text-blue-400 block">Co to znaczy?</span>
+            <p class="text-slate-300 leading-relaxed text-[11px]" id="profitExplanationText">
+              <!-- dynamicznie generowany tekst -->
+            </p>
+          </div>
+        </div>
+
+        <!-- Tile 3: Roczna rentowność -->
+        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-700 space-y-3 relative overflow-hidden">
+          <div class="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-800/80">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Roczna rentowność</span>
+            <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">
+              <span class="text-[11px] text-slate-300 font-medium">Uwzględniaj wzrost wartości</span>
+              <input type="checkbox" id="includeAppToggle" onchange="toggleIncludeApp()" class="sr-only peer" aria-label="Uwzględniaj wzrost wartości">
+              <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600 relative"></div>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-0.5">
+            <!-- Stat 1: Rentowność najmu (Top aligned) -->
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-indigo-500/70 shadow-[0_0_15px_rgba(99,102,241,0.25)] flex flex-col justify-start">
+              <div class="flex justify-between items-start gap-1">
+                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Rentowność najmu</span>
+                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 font-medium shrink-0">netto</span>
+              </div>
+              <div class="flex items-baseline my-0.5">
+                <span id="roiYieldSubValue" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0,00%</span>
+                <span class="text-[11px] text-slate-400 ml-1.5">/ rok</span>
+              </div>
+              <div class="text-[10px] text-slate-400 leading-tight pt-1" id="roiYieldDesc">
+                Zwrot z inwestycji (ROI).
+              </div>
+            </div>
+
+            <!-- Stat 2: Odpowiednik lokaty (Top aligned) -->
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-indigo-500/70 shadow-[0_0_15px_rgba(99,102,241,0.25)] flex flex-col justify-start">
+              <div class="flex justify-between items-start gap-1">
+                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Odpowiednik lokaty</span>
+                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 font-medium shrink-0">brutto</span>
+              </div>
+              <div class="flex items-baseline my-0.5">
+                <span id="roiBruttoSubValue" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0,00%</span>
+                <span class="text-[11px] text-slate-400 ml-1.5">/ rok</span>
+              </div>
+              <div class="text-[10px] text-slate-400 leading-tight pt-1">
+                Zwrot potrzebny do dorównania tej rentowności, przed opodatkowaniem.
+              </div>
+            </div>
+          </div>
+
+          <!-- Co to znaczy? -->
+          <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-1 text-xs">
+            <span class="font-semibold text-blue-400 block">Co to znaczy?</span>
+            <p class="text-slate-300 leading-relaxed text-[11px]" id="roiExplanationText">
+              <!-- dynamicznie generowany tekst -->
+            </p>
+          </div>
+        </div>
+
+        <!-- Tile 4: Alternatywa dla tej inwestycji -->
+        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-700 space-y-3 relative overflow-hidden">
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Alternatywa dla tej inwestycji</span>
+            
+            <!-- Toggle ETF vs Lokata -->
+            <div class="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-700 text-[11px]">
+              <button type="button" id="btnAltEtf" onclick="setAltType('etf')" class="px-2 py-0.5 rounded-md font-medium text-white bg-blue-600 transition" aria-label="Alternatywa: ETF">
+                ETF
+              </button>
+              <button type="button" id="btnAltLokata" onclick="setAltType('lokata')" class="px-2 py-0.5 rounded-md font-medium text-slate-400 hover:text-white transition" aria-label="Alternatywa: Lokata">
+                Lokata
+              </button>
+            </div>
+          </div>
+
+          <!-- Kafelki wyników w dwukolumnowym układzie (Top aligned) -->
+          <div class="grid grid-cols-2 gap-3 pt-0.5">
+            <!-- Stat 1: Wynik z mieszkania (Inwestycja zarabia) -->
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-indigo-500/70 shadow-[0_0_15px_rgba(99,102,241,0.25)] flex flex-col justify-start">
+              <div class="flex justify-between items-start gap-1">
+                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Inwestycja zarabia</span>
+                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 font-medium shrink-0">netto</span>
+              </div>
+              <div class="flex items-baseline my-0.5">
+                <span id="cagrNetValueDisplay" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0,00%</span>
+                <span class="text-[11px] text-slate-400 ml-1.5">/ rok</span>
+              </div>
+              <div class="text-[10px] text-slate-400 leading-tight pt-1">
+                Przy zerowym cashflow zainwestowana gotówka daje taki zwrot.
+              </div>
+            </div>
+
+            <!-- Stat 2: Wymagana stopa alternatywy (Wymagany ETF / Lokata) -->
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-indigo-500/70 shadow-[0_0_15px_rgba(99,102,241,0.25)] flex flex-col justify-start">
+              <div class="flex justify-between items-start gap-1">
+                <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider" id="altCardTitle">Wymagany ETF</span>
+                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 font-medium shrink-0">brutto</span>
+              </div>
+              <div class="flex items-baseline my-0.5">
+                <span id="cagrGrossValue" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0,00%</span>
+                <span class="text-[11px] text-slate-400 ml-1.5">/ rok</span>
+              </div>
+              <div class="text-[10px] text-slate-400 leading-tight pt-1">
+                Zwrot (CAGR) potrzebny do dorównania tej inwestycji.
+              </div>
+            </div>
+          </div>
+
+          <!-- Co to znaczy? -->
+          <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-1 text-xs">
+            <span class="font-semibold text-blue-400 block">Co to znaczy?</span>
+            <p class="text-slate-300 leading-relaxed text-[11px]" id="cagrExplanationText">
+              <!-- dynamicznie generowany tekst -->
+            </p>
+            <div id="cagrTaxNote" class="text-[10px] text-slate-400 pt-1 border-t border-slate-800/60 mt-1">
+              Podatek Belki: wyliczony dla ETF akumulującego (podatek 19% pobierany jednorazowo przy wyjściu).
+            </div>
+          </div>
+        </div>
+
+        <!-- Ryzyka i Disclaimer -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400 space-y-2 leading-relaxed">
+          <div class="text-amber-400 font-bold text-xs">
+            <span>Ryzyka i ograniczenia modelu:</span>
+          </div>
+          <ul class="list-disc list-inside space-y-1.5 text-[11px] text-slate-400">
+            <li>
+              <strong class="text-slate-300">Rata może wzrosnąć.</strong> Przy zmiennym oprocentowaniu wyższe stopy mogą sprawić, że czynsz nie pokryje już raty i pozostałych kosztów.
+            </li>
+            <li>
+              <strong class="text-slate-300">Najem nie zawsze działa zgodnie z planem.</strong> Pustostany, niepłacący najemcy, niższy czynsz czy większe naprawy mogą obniżyć rzeczywisty zysk.
+            </li>
+            <li>
+              <strong class="text-slate-300">Cena mieszkania nie musi rosnąć.</strong> Model zakłada stały wzrost wartości nieruchomości, ale ceny mogą rosnąć wolniej, stać w miejscu lub spadać.
+            </li>
+            <li>
+              <strong class="text-slate-300">Nie wszystkie koszty są uwzględnione.</strong> Kalkulator nie wycenia m.in. czasu właściciela, większych remontów ani kosztów ewentualnej sprzedaży.
+            </li>
+            <li>
+              <strong class="text-slate-300">Porównanie z ETF-em i lokatą jest orientacyjne.</strong> To różne inwestycje, a ich rzeczywiste wyniki, ryzyko i podatki mogą być inne niż w modelu.
+            </li>
+          </ul>
+          <div class="pt-2 border-t border-slate-800/80 text-[10px] text-slate-500 text-center mt-2">
+            Kalkulator ma charakter edukacyjny. Wyniki są orientacyjne i nie stanowią porady finansowej ani inwestycyjnej.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BELKA_TAX_RATE = 0.19;
+    const MSG_NEGATIVE_MARGIN_HTML = '<span class="text-red-400 font-semibold">Dochód z najmu netto nie pokrywa raty – zmień parametry.</span>';
+    const MSG_DEFAULT_MARGIN_INFO = 'Dobierz kredyt tak, aby wychodzić trochę nad zero nawet przy wyższych stopach i niższym czynszu. Nadwyżka nie jest wliczana do zysku.';
+
+    let altType = 'etf';
+    let incomeMode = 'mo';
+    let isPccExempt = false;
+    let isNotaryAuto = true;
+    let includeAppreciation = false;
+    let costModes = {
+      dp: 'pct',
+      agent: 'pct'
+    };
+
+    function parseFormattedNum(val) {
+      if (val === null || val === undefined) return 0;
+      if (typeof val === 'number') return isNaN(val) ? 0 : val;
+      let cleaned = String(val).replace(/\s/g, '').replace(/,/g, '.').replace(/[^0-9.-]/g, '');
+      let parsed = parseFloat(cleaned);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+
+    function formatPLNStr(num) {
+      if (isNaN(num) || num === null || num === undefined || !isFinite(num)) return '0';
+      let rounded = Math.round(num);
+      return rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    }
+
+    function getYearsString(years) {
+      let y = Math.round(years);
+      if (y === 1) return '1 rok';
+      let lastDigit = y % 10;
+      let lastTwoDigits = y % 100;
+      if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 12 || lastTwoDigits > 14)) {
+        return `${y} lata`;
+      }
+      return `${y} lat`;
+    }
+
+    function getAutoNotaryCost(price, loanAmount) {
+      if (price <= 0) return 0;
+      let tax = 0;
+      if (price <= 3000) tax = 100;
+      else if (price <= 10000) tax = 100 + (price - 3000) * 0.03;
+      else if (price <= 30000) tax = 310 + (price - 10000) * 0.02;
+      else if (price <= 60000) tax = 710 + (price - 30000) * 0.01;
+      else if (price <= 1000000) tax = 1010 + (price - 60000) * 0.004;
+      else if (price <= 2000000) tax = 4770 + (price - 1000000) * 0.002;
+      else tax = 6770 + (price - 2000000) * 0.0025;
+      
+      tax = Math.min(tax, 10000);
+      
+      let halfTax = tax * 0.5;
+      let kwFees = loanAmount > 0 ? 400 : 200;
+      let totalWithVat = halfTax * 1.23 + kwFees;
+      return Math.round(totalWithVat);
+    }
+
+    function togglePccExempt() {
+      const toggle = document.getElementById('pccExemptToggle');
+      isPccExempt = toggle ? toggle.checked : false;
+      calculateAll();
+    }
+
+    function toggleNotaryAuto() {
+      const toggle = document.getElementById('notaryAutoToggle');
+      isNotaryAuto = toggle ? toggle.checked : true;
+      const input = document.getElementById('costNotaryInput');
+      if (input) {
+        if (isNotaryAuto) {
+          input.setAttribute('readonly', 'readonly');
+        } else {
+          input.removeAttribute('readonly');
+        }
+      }
+      calculateAll();
+    }
+    
+    function toggleIncludeApp() {
+      const toggle = document.getElementById('includeAppToggle');
+      includeAppreciation = toggle ? toggle.checked : false;
+      calculateAll();
+    }
+
+    function saveState() {
+      try {
+        const state = {
+          price: document.getElementById('priceInput')?.value,
+          isPccExempt: isPccExempt,
+          isNotaryAuto: isNotaryAuto,
+          includeAppreciation: includeAppreciation,
+          costNotary: document.getElementById('costNotaryInput')?.value,
+          costAgent: document.getElementById('costAgentInput')?.value,
+          costRehab: document.getElementById('costRehabInput')?.value,
+          costModes: costModes,
+          dp: document.getElementById('costDpInput')?.value,
+          term: document.getElementById('termInput')?.value,
+          interest: document.getElementById('interestInput')?.value,
+          rent: document.getElementById('advRent')?.value,
+          vacancy: document.getElementById('advVacancy')?.value,
+          tax: document.getElementById('advTax')?.value,
+          fund: document.getElementById('advFund')?.value,
+          appreciation: document.getElementById('appreciationInput')?.value,
+          altType: altType,
+          incomeMode: incomeMode
+        };
+        localStorage.setItem('kalkulator_najmu_state', JSON.stringify(state));
+        
+        const toast = document.getElementById('saveStatus');
+        if (toast) {
+          toast.classList.remove('opacity-0', 'translate-y-3', 'pointer-events-none');
+          toast.classList.add('opacity-100', 'translate-y-0');
+          setTimeout(() => {
+            toast.classList.remove('opacity-100', 'translate-y-0');
+            toast.classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
+          }, 3000);
+        }
+      } catch (e) {
+        console.error("Nie udało się zapisać stanu:", e);
+      }
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('kalkulator_najmu_state');
+        if (saved) {
+          const state = JSON.parse(saved);
+          
+          if (state.price !== undefined && document.getElementById('priceInput')) document.getElementById('priceInput').value = state.price;
+          if (state.isPccExempt !== undefined) {
+            isPccExempt = state.isPccExempt;
+            const toggle = document.getElementById('pccExemptToggle');
+            if (toggle) toggle.checked = isPccExempt;
+          }
+          if (state.isNotaryAuto !== undefined) {
+            isNotaryAuto = state.isNotaryAuto;
+            const toggle = document.getElementById('notaryAutoToggle');
+            if (toggle) toggle.checked = isNotaryAuto;
+            const input = document.getElementById('costNotaryInput');
+            if (input) {
+              if (isNotaryAuto) input.setAttribute('readonly', 'readonly');
+              else input.removeAttribute('readonly');
+            }
+          }
+          if (state.includeAppreciation !== undefined) {
+            includeAppreciation = state.includeAppreciation;
+            const toggle = document.getElementById('includeAppToggle');
+            if (toggle) toggle.checked = includeAppreciation;
+          }
+          if (state.costNotary !== undefined && document.getElementById('costNotaryInput')) document.getElementById('costNotaryInput').value = state.costNotary;
+          if (state.costAgent !== undefined && document.getElementById('costAgentInput')) document.getElementById('costAgentInput').value = state.costAgent;
+          if (state.costRehab !== undefined && document.getElementById('costRehabInput')) document.getElementById('costRehabInput').value = state.costRehab;
+          if (state.costModes !== undefined) {
+            costModes = Object.assign({ dp: 'pct', agent: 'pct' }, state.costModes);
+          }
+          if (state.dp !== undefined && document.getElementById('costDpInput')) document.getElementById('costDpInput').value = state.dp;
+          if (state.term !== undefined && document.getElementById('termInput')) document.getElementById('termInput').value = state.term;
+          if (state.interest !== undefined && document.getElementById('interestInput')) document.getElementById('interestInput').value = state.interest;
+          if (state.rent !== undefined && document.getElementById('advRent')) document.getElementById('advRent').value = state.rent;
+          if (state.vacancy !== undefined && document.getElementById('advVacancy')) document.getElementById('advVacancy').value = state.vacancy;
+          if (state.tax !== undefined && document.getElementById('advTax')) document.getElementById('advTax').value = state.tax;
+          if (state.fund !== undefined && document.getElementById('advFund')) document.getElementById('advFund').value = state.fund;
+          if (state.appreciation !== undefined && document.getElementById('appreciationInput')) document.getElementById('appreciationInput').value = state.appreciation;
+          if (state.altType !== undefined) setAltType(state.altType);
+          if (state.incomeMode !== undefined) setIncomeMode(state.incomeMode);
+        }
+      } catch (e) {
+        console.error("Nie udało się wczytać stanu:", e);
+      }
+      syncControlsFromState();
+    }
+
+    function syncControlsFromState() {
+      // 1. Odtworzenie UI dla trybów costModes (% vs PLN/zł), ich jednostek oraz zakresów i kroków suwaków
+      ['dp', 'agent'].forEach(key => {
+        const mode = costModes[key] || 'pct';
+        const btnPct = document.getElementById(`toggle${capitalize(key)}Pct`);
+        const btnPln = document.getElementById(`toggle${capitalize(key)}Pln`);
+        const suffix = document.getElementById(`${key}UnitSuffix`);
+        const range = document.getElementById(`cost${capitalize(key)}Range`);
+        const price = parseFormattedNum(document.getElementById('priceInput')?.value);
+
+        if (mode === 'pct') {
+          if (btnPct) btnPct.className = "px-1.5 py-0.5 rounded font-medium text-white bg-blue-600 transition";
+          if (btnPln) btnPln.className = "px-1.5 py-0.5 rounded font-medium text-slate-400 hover:text-white transition";
+          if (suffix) suffix.innerText = "%";
+          if (range) {
+            range.min = 0;
+            range.max = key === 'dp' ? 100 : 5;
+            range.step = key === 'dp' ? 1 : 0.1;
+          }
+        } else {
+          if (btnPln) btnPln.className = "px-1.5 py-0.5 rounded font-medium text-white bg-blue-600 transition";
+          if (btnPct) btnPct.className = "px-1.5 py-0.5 rounded font-medium text-slate-400 hover:text-white transition";
+          if (suffix) suffix.innerText = "zł";
+          if (range) {
+            range.min = 0;
+            range.max = key === 'dp' ? (price > 0 ? price : 2000000) : 50000;
+            range.step = key === 'dp' ? 5000 : 500;
+          }
+        }
+      });
+
+      // 2. Synchronizacja pozycji suwaków na podstawie aktualnych wartości pól tekstowych
+      const inputRangeMap = [
+        ['priceInput', 'priceRange'],
+        ['costDpInput', 'costDpRange'],
+        ['costAgentInput', 'costAgentRange'],
+        ['costRehabInput', 'costRehabRange'],
+        ['termInput', 'termRange'],
+        ['interestInput', 'interestRange'],
+        ['advRent', 'advRentRange'],
+        ['advVacancy', 'advVacancyRange'],
+        ['advTax', 'advTaxRange'],
+        ['advFund', 'advFundRange'],
+        ['appreciationInput', 'appreciationRange']
+      ];
+
+      inputRangeMap.forEach(([inputId, rangeId]) => {
+        const input = document.getElementById(inputId);
+        const range = document.getElementById(rangeId);
+        if (input && range) {
+          range.value = parseFormattedNum(input.value);
+        }
+      });
+    }
+
+    function setAltType(type) {
+      altType = type;
+      const btnEtf = document.getElementById('btnAltEtf');
+      const btnLokata = document.getElementById('btnAltLokata');
+      const taxNote = document.getElementById('cagrTaxNote');
+      const altCardTitle = document.getElementById('altCardTitle');
+
+      if (type === 'etf') {
+        btnEtf.className = "px-2 py-0.5 rounded-md font-medium text-white bg-blue-600 transition";
+        btnLokata.className = "px-2 py-0.5 rounded-md font-medium text-slate-400 hover:text-white transition";
+        if(taxNote) taxNote.innerText = "Podatek Belki: wyliczony dla ETF akumulującego (podatek 19% pobierany jednorazowo przy wyjściu).";
+        if(altCardTitle) altCardTitle.innerText = "Wymagany ETF";
+      } else {
+        btnLokata.className = "px-2 py-0.5 rounded-md font-medium text-white bg-blue-600 transition";
+        btnEtf.className = "px-2 py-0.5 rounded-md font-medium text-slate-400 hover:text-white transition";
+        if(taxNote) taxNote.innerText = "Podatek Belki: wyliczony dla lokaty lub obligacji z roczną kapitalizacją (podatek 19% pobierany co roku).";
+        if(altCardTitle) altCardTitle.innerText = "Wymagana lokata";
+      }
+      calculateAll();
+    }
+
+    function setCostMode(key, mode) {
+      if (costModes[key] === mode) return; 
+      
+      costModes[key] = mode;
+      const btnPct = document.getElementById(`toggle${capitalize(key)}Pct`);
+      const btnPln = document.getElementById(`toggle${capitalize(key)}Pln`);
+      const suffix = document.getElementById(`${key}UnitSuffix`);
+      const input = document.getElementById(`cost${capitalize(key)}Input`);
+      const range = document.getElementById(`cost${capitalize(key)}Range`);
+      const price = parseFormattedNum(document.getElementById('priceInput')?.value);
+
+      if (mode === 'pct') {
+        if (btnPct) btnPct.className = "px-1.5 py-0.5 rounded font-medium text-white bg-blue-600 transition";
+        if (btnPln) btnPln.className = "px-1.5 py-0.5 rounded font-medium text-slate-400 hover:text-white transition";
+        if (suffix) suffix.innerText = "%";
+        
+        let plnVal = parseFormattedNum(input?.value);
+        let pctVal = price > 0 ? (plnVal / price) * 100 : 0;
+        
+        if (key === 'dp') {
+          if (range) { range.min = 0; range.max = 100; range.step = 1; range.value = Math.min(100, Math.max(0, pctVal)); }
+          if (input) input.value = (pctVal % 1 !== 0) ? pctVal.toFixed(2).replace('.', ',') : Math.round(pctVal);
+        } else {
+          if (range) { range.min = 0; range.max = 5; range.step = 0.1; range.value = pctVal; }
+          if (input) input.value = (pctVal % 1 !== 0) ? pctVal.toFixed(2).replace('.', ',') : Math.round(pctVal);
+        }
+      } else {
+        if (btnPln) btnPln.className = "px-1.5 py-0.5 rounded font-medium text-white bg-blue-600 transition";
+        if (btnPct) btnPct.className = "px-1.5 py-0.5 rounded font-medium text-slate-400 hover:text-white transition";
+        if (suffix) suffix.innerText = "zł";
+        
+        let pctVal = parseFloat(input?.value?.replace(',', '.')) || 0;
+        let plnVal = price * (pctVal / 100);
+        
+        if (key === 'dp') {
+          const maxPln = price;
+          if (range) { range.min = 0; range.max = maxPln; range.step = 5000; range.value = Math.min(maxPln, plnVal); }
+          if (input) input.value = formatPLNStr(Math.round(plnVal));
+        } else {
+          if (range) { range.min = 0; range.max = 50000; range.step = 500; range.value = plnVal; }
+          if (input) input.value = formatPLNStr(Math.round(plnVal));
+        }
+      }
+      calculateAll();
+    }
+
+    function setIncomeMode(mode) {
+      incomeMode = mode;
+      const btnMo = document.getElementById('toggleIncomeMo');
+      const btnYr = document.getElementById('toggleIncomeYr');
+      const suffix = document.getElementById('incomeUnitSuffix');
+
+      if (mode === 'mo') {
+        if (btnMo) btnMo.className = "px-2 py-0.5 rounded-md font-medium text-white bg-blue-600 transition";
+        if (btnYr) btnYr.className = "px-2 py-0.5 rounded-md font-medium text-slate-400 hover:text-white transition";
+        if (suffix) suffix.innerText = "zł / mc";
+      } else {
+        if (btnYr) btnYr.className = "px-2 py-0.5 rounded-md font-medium text-white bg-blue-600 transition";
+        if (btnMo) btnMo.className = "px-2 py-0.5 rounded-md font-medium text-slate-400 hover:text-white transition";
+        if (suffix) suffix.innerText = "zł / rok";
+      }
+      calculateAll();
+    }
+
+    function updateDpRangeOnPriceChange(price) {
+      if (costModes.dp === 'pln') {
+        const range = document.getElementById('costDpRange');
+        const input = document.getElementById('costDpInput');
+        const maxPln = price > 0 ? price : 2000000;
+        if (range) {
+          range.max = maxPln;
+        }
+        if (input) {
+          let currentDp = parseFormattedNum(input.value);
+          if (currentDp > price) {
+            input.value = formatPLNStr(price);
+            if (range) range.value = price;
+          }
+        }
+      }
+    }
+
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function calculateAll() {
+      try {
+        const price = parseFormattedNum(document.getElementById('priceInput')?.value);
+        
+        const dpInput = document.getElementById('costDpInput');
+        let dpVal = parseFormattedNum(dpInput?.value) || 0;
+        let downPaymentAmount = 0;
+
+        if (costModes.dp === 'pct') {
+          downPaymentAmount = price * (dpVal / 100);
+        } else {
+          downPaymentAmount = dpVal;
+        }
+        downPaymentAmount = Math.min(price, Math.max(0, downPaymentAmount));
+        
+        let rawTerm = parseFloat(document.getElementById('termInput')?.value);
+        let termYears = isNaN(rawTerm) ? 25 : Math.min(35, Math.max(5, rawTerm));
+        
+        const yearsText = getYearsString(termYears);
+        let interestRate = parseFloat(document.getElementById('interestInput')?.value?.replace(',', '.')) || 0;
+
+        const profitTermEl = document.getElementById('profitTermDisplay');
+        if (profitTermEl) profitTermEl.innerText = yearsText;
+
+        const futureValTermEl = document.getElementById('futureValTermDisplay');
+        if (futureValTermEl) futureValTermEl.innerText = yearsText;
+
+        const termSuffix = yearsText.split(' ')[1] || 'lat';
+        const termUnitEl = document.getElementById('termUnitSuffix');
+        if (termUnitEl) termUnitEl.innerText = termSuffix;
+
+        const loanAmount = Math.max(0, price - downPaymentAmount);
+
+        let monthlyInstallment = 0;
+        const termMonths = termYears * 12;
+        const r = interestRate / 100 / 12;
+        
+        if (loanAmount > 0 && termMonths > 0) {
+          if (r > 0) {
+            const pow = Math.pow(1 + r, termMonths);
+            if (isFinite(pow) && pow > 1) {
+              monthlyInstallment = loanAmount * r * pow / (pow - 1);
+            } else {
+              monthlyInstallment = loanAmount / termMonths;
+            }
+          } else {
+            monthlyInstallment = loanAmount / termMonths;
+          }
+        }
+        if (!isFinite(monthlyInstallment) || isNaN(monthlyInstallment)) monthlyInstallment = 0;
+
+        const loanInstEl = document.getElementById('loanInstallmentDisplay');
+        if (loanInstEl) {
+          loanInstEl.innerText = formatPLNStr(Math.round(monthlyInstallment));
+        }
+
+        let totalInitialCosts = 0;
+        
+        let pccAmount = isPccExempt ? 0 : price * 0.02;
+        const pccValEl = document.getElementById('pccValueDisplay');
+        if (pccValEl) pccValEl.innerText = formatPLNStr(Math.round(pccAmount)) + ' zł';
+        totalInitialCosts += pccAmount;
+
+        let notaryAmount = 0;
+        if (isNotaryAuto) {
+          notaryAmount = getAutoNotaryCost(price, loanAmount);
+          const notaryInput = document.getElementById('costNotaryInput');
+          if (notaryInput) notaryInput.value = formatPLNStr(notaryAmount);
+        } else {
+          notaryAmount = parseFormattedNum(document.getElementById('costNotaryInput')?.value);
+        }
+        totalInitialCosts += notaryAmount;
+
+        const agentInput = document.getElementById('costAgentInput');
+        let agentVal = parseFormattedNum(agentInput?.value) || 0;
+        if (costModes.agent === 'pct') {
+          totalInitialCosts += price * (agentVal / 100);
+        } else {
+          totalInitialCosts += agentVal;
+        }
+
+        let rehabVal = parseFormattedNum(document.getElementById('costRehabInput')?.value) || 0;
+        totalInitialCosts += rehabVal;
+
+        const totalInvestedCash = downPaymentAmount + totalInitialCosts;
+        const summaryInitEl = document.getElementById('summaryInitialCosts');
+        if (summaryInitEl) summaryInitEl.innerText = formatPLNStr(Math.round(totalInvestedCash)) + ' zł';
+        
+        const subtextEl = document.getElementById('summaryInitialCostsSubtext');
+        if (subtextEl) {
+          subtextEl.innerHTML = `Wkład własny <strong>${formatPLNStr(Math.round(downPaymentAmount))} zł</strong> + koszty początkowe <strong>${formatPLNStr(Math.round(totalInitialCosts))} zł</strong>`;
+        }
+
+        const rent = parseFormattedNum(document.getElementById('advRent')?.value);
+        const taxRate = parseFloat(document.getElementById('advTax')?.value?.replace(',', '.')) || 0;
+        const fund = parseFormattedNum(document.getElementById('advFund')?.value);
+        const vacancy = parseFloat(document.getElementById('advVacancy')?.value?.replace(',', '.')) || 0;
+        
+        const effectiveMonths = Math.max(0, 12 - vacancy);
+        
+        let annualRev = rent * effectiveMonths;
+        let annualTax = annualRev * (taxRate / 100);
+
+        const annualFund = fund * 12; 
+        const annualNet = annualRev - annualTax - annualFund;
+
+        const displayNet = incomeMode === 'mo' ? (annualNet / 12) : annualNet;
+        const displayInstallment = incomeMode === 'mo' ? monthlyInstallment : (monthlyInstallment * 12);
+        
+        const marginAmount = displayNet - displayInstallment;
+        const isNegativeMargin = marginAmount < 0;
+        
+        let marginPctText = "—";
+        if (displayNet > 0) {
+          marginPctText = ((marginAmount / displayNet) * 100).toFixed(1).replace('.', ',') + "%";
+        }
+
+        const incomeDispEl = document.getElementById('incomeDisplay');
+        if (incomeDispEl) incomeDispEl.innerText = formatPLNStr(Math.round(displayNet));
+        
+        const marginEl = document.getElementById('marginDisplay');
+        const marginPctEl = document.getElementById('marginPctDisplay');
+        const incomeInfoText = document.getElementById('incomeInfoText');
+        
+        if (marginEl) marginEl.innerText = formatPLNStr(Math.round(marginAmount)) + ' zł';
+        if (marginPctEl) marginPctEl.innerText = marginPctText;
+
+        const netContainer = document.getElementById('netIncomeContainer');
+        const netInfoBox = document.getElementById('incomeInfoBox');
+
+        if (isNegativeMargin) {
+          if (marginEl) marginEl.className = "text-xl font-bold text-red-400 tracking-tight";
+          if (marginPctEl) marginPctEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 font-semibold tracking-wide";
+          if (netContainer) netContainer.className = "p-4 sm:p-5 rounded-xl bg-red-950/20 border border-red-900/50 mt-4 transition-colors";
+          if (netInfoBox) netInfoBox.className = "text-[11px] text-red-300/90 flex items-start gap-1.5 leading-relaxed bg-red-500/10 p-2.5 rounded-lg border border-red-500/20 mt-2";
+          if (incomeInfoText) incomeInfoText.innerHTML = MSG_NEGATIVE_MARGIN_HTML;
+        } else {
+          if (marginEl) marginEl.className = "text-xl font-bold text-emerald-400 tracking-tight";
+          if (marginPctEl) marginPctEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold tracking-wide";
+          if (netContainer) netContainer.className = "p-4 sm:p-5 rounded-xl bg-slate-800/50 border border-slate-700 mt-4 transition-colors";
+          if (netInfoBox) netInfoBox.className = "text-[11px] text-emerald-300/90 flex items-start gap-1.5 leading-relaxed bg-emerald-500/10 p-2.5 rounded-lg border border-emerald-500/20 mt-2";
+          if (incomeInfoText) incomeInfoText.innerText = MSG_DEFAULT_MARGIN_INFO;
+        }
+        
+        if (incomeDispEl) {
+          if (displayNet < 0) {
+            incomeDispEl.className = "text-3xl font-extrabold text-red-400 tracking-tight";
+          } else {
+            incomeDispEl.className = "text-3xl font-extrabold text-emerald-400 tracking-tight";
+          }
+        }
+
+        const appRate = parseFloat(document.getElementById('appreciationInput')?.value?.replace(',', '.')) || 0;
+        const growthFactor = 1 + (appRate / 100);
+        const futurePrice = price * Math.pow(growthFactor, termYears);
+
+        const futurePriceEl = document.getElementById('futurePriceDisplay');
+        if (futurePriceEl) {
+          futurePriceEl.innerText = formatPLNStr(Math.round(futurePrice)) + ' zł';
+        }
+
+        const totalProfit = futurePrice - totalInvestedCash;
+
+        let cagrNetReturn = (totalInvestedCash > 0 && futurePrice > 0 && termYears > 0) ? (Math.pow(futurePrice / totalInvestedCash, 1 / termYears) - 1) * 100 : 0;
+        if (!isFinite(cagrNetReturn) || isNaN(cagrNetReturn)) cagrNetReturn = 0;
+
+        let cagrGrossReturn = 0;
+        if (totalProfit > 0 && totalInvestedCash > 0 && termYears > 0) {
+            if (altType === 'etf') {
+               let targetGrossProfit = totalProfit / (1 - BELKA_TAX_RATE);
+               let targetGrossFV = totalInvestedCash + targetGrossProfit;
+               if (targetGrossFV > 0) {
+                 cagrGrossReturn = (Math.pow(targetGrossFV / totalInvestedCash, 1 / termYears) - 1) * 100;
+               }
+            } else {
+               cagrGrossReturn = cagrNetReturn / (1 - BELKA_TAX_RATE);
+            }
+        } else {
+           cagrGrossReturn = cagrNetReturn;
+        }
+        if (!isFinite(cagrGrossReturn) || isNaN(cagrGrossReturn)) cagrGrossReturn = 0;
+
+        let costBasis = price + totalInitialCosts;
+        let yieldReturn = costBasis > 0 ? (annualNet / costBasis) * 100 : 0;
+        if (!isFinite(yieldReturn) || isNaN(yieldReturn)) yieldReturn = 0;
+        
+        let activeRoiReturn = includeAppreciation ? yieldReturn + appRate : yieldReturn;
+        let roiBruttoReturn = activeRoiReturn > 0 ? activeRoiReturn / (1 - BELKA_TAX_RATE) : activeRoiReturn;
+        if (!isFinite(activeRoiReturn) || isNaN(activeRoiReturn)) activeRoiReturn = 0;
+        if (!isFinite(roiBruttoReturn) || isNaN(roiBruttoReturn)) roiBruttoReturn = 0;
+
+        // Tile 2: Zysk po całym okresie
+        const totalEl = document.getElementById('summaryTotalProfit');
+        const profitExpl = document.getElementById('profitExplanationText');
+
+        if (isNegativeMargin) {
+          if (totalEl) {
+            totalEl.innerText = "—";
+            totalEl.className = "text-xl sm:text-2xl font-extrabold text-white tracking-tight";
+          }
+          if (profitExpl) {
+            profitExpl.innerHTML = MSG_NEGATIVE_MARGIN_HTML;
+          }
+        } else {
+          if (totalEl) {
+            totalEl.innerText = formatPLNStr(Math.round(totalProfit)) + ' zł';
+            if (totalProfit < 0) totalEl.className = "text-xl sm:text-2xl font-extrabold text-red-400 tracking-tight";
+            else totalEl.className = "text-xl sm:text-2xl font-extrabold text-white tracking-tight";
+          }
+          if (profitExpl) {
+            profitExpl.innerHTML = `Przy zerowym cashflow jest to wartość nieruchomości po spłacie (<strong>${formatPLNStr(Math.round(futurePrice))} zł</strong>) minus suma zainwestowanej gotówki (<strong>${formatPLNStr(Math.round(totalInvestedCash))} zł</strong>). Nie uwzględnia zakumulowanej nadwyżki po racie ani kosztów i opodatkowania ewentualnej sprzedaży.`;
+          }
+        }
+
+        // Tile 4: Alternatywa dla tej inwestycji
+        const cagrGrossEl = document.getElementById('cagrGrossValue');
+        const cagrNetValEl = document.getElementById('cagrNetValueDisplay');
+        if (isNegativeMargin || totalInvestedCash === 0) {
+          if (cagrGrossEl) cagrGrossEl.innerText = "—";
+          if (cagrNetValEl) cagrNetValEl.innerText = "—";
+        } else {
+          if (cagrGrossEl) {
+            cagrGrossEl.innerText = `${cagrGrossReturn.toFixed(2).replace('.', ',')}%`;
+          }
+          if (cagrNetValEl) {
+            cagrNetValEl.innerText = `${cagrNetReturn.toFixed(2).replace('.', ',')}%`;
+          }
+        }
+        
+        const cagrExpl = document.getElementById('cagrExplanationText');
+        if (cagrExpl) {
+          if (isNegativeMargin) {
+            cagrExpl.innerHTML = MSG_NEGATIVE_MARGIN_HTML;
+          } else {
+            const altNameHtml = altType === 'etf' ? 'ETF' : 'lokacie lub obligacjach';
+            const verbPronoun = altType === 'etf' ? 'musiałby on' : 'musiałyby one';
+            cagrExpl.innerHTML = `Gdyby tę samą gotówkę <strong>${formatPLNStr(Math.round(totalInvestedCash))} zł</strong> ulokować w ${altNameHtml}, ${verbPronoun} dawać średnio <strong>${cagrGrossReturn.toFixed(2).replace('.', ',')}%</strong> rocznie przed podatkiem, żeby po zapłaceniu tego podatku dorównać wartości mieszkania (<strong>${formatPLNStr(Math.round(futurePrice))} zł</strong>) po upływie okresu inwestycji (<strong>${yearsText}</strong>). Stopa nominalna, z procentem składanym.`;
+          }
+        }
+
+        // Tile 3: Roczna rentowność
+        const roiYieldSubVal = document.getElementById('roiYieldSubValue');
+        const roiBruttoSubVal = document.getElementById('roiBruttoSubValue');
+
+        if (isNegativeMargin) {
+          if (roiYieldSubVal) roiYieldSubVal.innerText = "—";
+          if (roiBruttoSubVal) roiBruttoSubVal.innerText = "—";
+        } else {
+          if (roiYieldSubVal) roiYieldSubVal.innerText = `${activeRoiReturn.toFixed(2).replace('.', ',')}%`;
+          if (roiBruttoSubVal) roiBruttoSubVal.innerText = `${roiBruttoReturn.toFixed(2).replace('.', ',')}%`;
+        }
+        
+        const roiYieldDesc = document.getElementById('roiYieldDesc');
+        if (roiYieldDesc) {
+          const appRateFormatted = (appRate % 1 === 0 ? appRate : appRate.toFixed(1)).toString().replace('.', ',');
+          roiYieldDesc.innerText = includeAppreciation 
+            ? `Zwrot z inwestycji (ROI) + wzrost wartości (${appRateFormatted}%).` 
+            : "Zwrot z inwestycji (ROI).";
+        }
+
+        const roiExpl = document.getElementById('roiExplanationText');
+        if (roiExpl) {
+          if (isNegativeMargin) {
+            roiExpl.innerHTML = MSG_NEGATIVE_MARGIN_HTML;
+          } else {
+            const appRateFormatted = (appRate % 1 === 0 ? appRate : appRate.toFixed(1)).toString().replace('.', ',');
+            if (includeAppreciation) {
+              roiExpl.innerHTML = `Roczny dochód netto z najmu przed ratą to <strong>${formatPLNStr(Math.round(annualNet))} zł</strong>, co w stosunku do ceny zakupu i kosztów początkowych (<strong>${formatPLNStr(Math.round(costBasis))} zł</strong>) wynosi <strong>${yieldReturn.toFixed(2).replace('.', ',')}%</strong>, a po uwzględnieniu wzrostu wartości nieruchomości (<strong>${appRateFormatted}%</strong>) daje <strong>${activeRoiReturn.toFixed(2).replace('.', ',')}%</strong>. Żeby lokata lub obligacje dawały taki wynik, musiałyby oferować <strong>${roiBruttoReturn.toFixed(2).replace('.', ',')}%</strong> rocznie przed opodatkowaniem.`;
+            } else {
+              roiExpl.innerHTML = `Roczny dochód netto z najmu przed ratą to <strong>${formatPLNStr(Math.round(annualNet))} zł</strong>, co w stosunku do ceny zakupu i kosztów początkowych (<strong>${formatPLNStr(Math.round(costBasis))} zł</strong>) wynosi <strong>${activeRoiReturn.toFixed(2).replace('.', ',')}%</strong>. Żeby lokata lub obligacje dawały taki wynik, musiałyby oferować <strong>${roiBruttoReturn.toFixed(2).replace('.', ',')}%</strong> rocznie przed opodatkowaniem.`;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Błąd w calculateAll:", err);
+      }
+    }
+
+    function setupListeners() {
+      const priceInput = document.getElementById('priceInput');
+      const priceRange = document.getElementById('priceRange');
+
+      priceInput.addEventListener('input', (e) => {
+        let val = e.target.value.replace(/[^\d]/g, '');
+        e.target.value = formatPLNStr(val);
+        const p = parseFormattedNum(val);
+        priceRange.value = p;
+        updateDpRangeOnPriceChange(p);
+        calculateAll();
+      });
+
+      priceRange.addEventListener('input', (e) => {
+        const p = parseInt(e.target.value, 10);
+        priceInput.value = formatPLNStr(p);
+        updateDpRangeOnPriceChange(p);
+        calculateAll();
+      });
+
+      const dpInput = document.getElementById('costDpInput');
+      const dpRange = document.getElementById('costDpRange');
+      dpInput.addEventListener('input', (e) => {
+        if (costModes.dp === 'pln') {
+          let val = e.target.value.replace(/[^\d]/g, '');
+          e.target.value = formatPLNStr(val);
+          dpRange.value = parseFormattedNum(e.target.value);
+        } else {
+          e.target.value = e.target.value.replace(/[^0-9.,]/g, '');
+          dpRange.value = parseFloat(e.target.value.replace(',', '.')) || 0;
+        }
+        calculateAll();
+      });
+      dpRange.addEventListener('input', (e) => {
+        dpInput.value = costModes.dp === 'pln' ? formatPLNStr(e.target.value) : e.target.value;
+        calculateAll();
+      });
+
+      const termInput = document.getElementById('termInput');
+      const termRange = document.getElementById('termRange');
+      
+      termInput.addEventListener('blur', (e) => {
+        let val = parseInt(e.target.value, 10);
+        if (isNaN(val) || val < 5) val = 5;
+        if (val > 35) val = 35;
+        e.target.value = val;
+        termRange.value = val;
+        calculateAll();
+      });
+
+      termInput.addEventListener('input', (e) => {
+        let val = e.target.value.replace(/[^\d]/g, '');
+        e.target.value = val;
+        let num = parseInt(val, 10);
+        if (num >= 5 && num <= 35) {
+          termRange.value = num;
+        }
+        calculateAll();
+      });
+
+      termRange.addEventListener('input', (e) => {
+        termInput.value = e.target.value;
+        calculateAll();
+      });
+
+      const interestInput = document.getElementById('interestInput');
+      const interestRange = document.getElementById('interestRange');
+      
+      interestInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^0-9.,]/g, '');
+        interestRange.value = parseFloat(e.target.value.replace(',', '.')) || 0;
+        calculateAll();
+      });
+      interestInput.addEventListener('blur', (e) => {
+        let val = parseFloat(e.target.value.replace(',', '.')) || 0;
+        e.target.value = val.toFixed(2).replace('.', ',');
+        calculateAll();
+      });
+      interestRange.addEventListener('input', (e) => {
+        let val = parseFloat(e.target.value) || 0;
+        interestInput.value = val.toFixed(2).replace('.', ',');
+        calculateAll();
+      });
+
+      const appInput = document.getElementById('appreciationInput');
+      const appRange = document.getElementById('appreciationRange');
+      appInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^0-9.,]/g, '');
+        appRange.value = parseFloat(e.target.value.replace(',', '.')) || 0;
+        calculateAll();
+      });
+      appInput.addEventListener('blur', (e) => {
+        let val = parseFloat(e.target.value.replace(',', '.')) || 0;
+        e.target.value = val.toFixed(2).replace('.', ',');
+        calculateAll();
+      });
+      appRange.addEventListener('input', (e) => {
+        let val = parseFloat(e.target.value) || 0;
+        appInput.value = val.toFixed(2).replace('.', ',');
+        calculateAll();
+      });
+
+      ['advRent', 'advFund'].forEach(id => {
+        const el = document.getElementById(id);
+        const rangeEl = document.getElementById(`${id}Range`);
+        if (el && rangeEl) {
+          el.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/[^\d]/g, '');
+            e.target.value = formatPLNStr(val);
+            rangeEl.value = parseFormattedNum(val);
+            calculateAll();
+          });
+          rangeEl.addEventListener('input', (e) => {
+            el.value = formatPLNStr(e.target.value);
+            calculateAll();
+          });
+        }
+      });
+
+      ['advTax', 'advVacancy'].forEach(id => {
+        const el = document.getElementById(id);
+        const rangeEl = document.getElementById(`${id}Range`);
+        if (el && rangeEl) {
+          el.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9.,]/g, '');
+            rangeEl.value = parseFloat(e.target.value.replace(',', '.')) || 0;
+            calculateAll();
+          });
+          rangeEl.addEventListener('input', (e) => {
+            el.value = e.target.value.replace('.', ',');
+            calculateAll();
+          });
+        }
+      });
+
+      const notaryInput = document.getElementById('costNotaryInput');
+      if (notaryInput) {
+        notaryInput.addEventListener('input', (e) => {
+          if (!isNotaryAuto) {
+            let val = e.target.value.replace(/[^\d]/g, '');
+            e.target.value = formatPLNStr(val);
+            calculateAll();
+          }
+        });
+      }
+
+      const agentInput = document.getElementById('costAgentInput');
+      const agentRange = document.getElementById('costAgentRange');
+      if (agentInput && agentRange) {
+        agentInput.addEventListener('input', (e) => {
+          if (costModes.agent === 'pln') {
+            let val = e.target.value.replace(/[^\d]/g, '');
+            e.target.value = formatPLNStr(val);
+            agentRange.value = parseFormattedNum(e.target.value);
+          } else {
+            e.target.value = e.target.value.replace(/[^0-9.,]/g, '');
+            agentRange.value = parseFloat(e.target.value.replace(',', '.')) || 0;
+          }
+          calculateAll();
+        });
+        agentRange.addEventListener('input', (e) => {
+          if (costModes.agent === 'pct') {
+             agentInput.value = parseFloat(e.target.value).toFixed(2).replace('.', ',');
+          } else {
+             agentInput.value = formatPLNStr(e.target.value);
+          }
+          calculateAll();
+        });
+      }
+
+      const rehabInput = document.getElementById('costRehabInput');
+      const rehabRange = document.getElementById('costRehabRange');
+      if (rehabInput && rehabRange) {
+        rehabInput.addEventListener('input', (e) => {
+          let val = e.target.value.replace(/[^\d]/g, '');
+          e.target.value = formatPLNStr(val);
+          rehabRange.value = parseFormattedNum(val);
+          calculateAll();
+        });
+        rehabRange.addEventListener('input', (e) => {
+          rehabInput.value = formatPLNStr(e.target.value);
+          calculateAll();
+        });
+      }
+    }
+
+    window.onload = () => {
+      loadState();
+      setupListeners();
+      calculateAll();
+    };
+  </script>
+</body>
+</html>
