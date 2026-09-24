@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
   <title>Kalkulator Rentowności Najmu</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,6 +13,7 @@
 
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: { sans: ['Inter', 'sans-serif'] },
@@ -21,10 +23,14 @@
   </script>
 
   <style>
+    :root {
+      color-scheme: dark;
+    }
     body {
       font-family: 'Inter', sans-serif;
       background-color: #0f172a;
       color: #f8fafc;
+      -webkit-tap-highlight-color: transparent;
     }
     input[type=range] {
       -webkit-appearance: none;
@@ -81,10 +87,10 @@
     }
   </style>
 </head>
-<body class="min-h-screen pb-12 pt-6 px-4 sm:px-6 lg:px-8">
+<body class="min-h-screen pb-12 pt-6 px-4 sm:px-6 lg:px-8 bg-slate-900 text-slate-100">
 
   <div class="max-w-5xl mx-auto space-y-6">
-    <header class="pb-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <header class="pb-4 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="flex flex-wrap items-baseline gap-2.5">
         <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
           Kalkulator Rentowności Najmu
@@ -92,7 +98,7 @@
         <span class="text-slate-400 text-sm font-medium">Mieszkanie czy Giełda?</span>
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="saveState()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-sm font-medium rounded-lg border border-slate-700 transition shadow-sm" aria-label="Zapisz parametry">
+        <button onclick="saveState()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-sm font-medium rounded-lg border border-slate-700/60 transition shadow-sm" aria-label="Zapisz parametry">
           Zapisz parametry
         </button>
       </div>
@@ -132,20 +138,20 @@
               <label for="priceInput" class="font-medium text-slate-300">Cena nieruchomości</label>
             </div>
             <div class="relative">
-              <input type="text" id="priceInput" value="750 000" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-3.5 pr-14 py-2.5 text-white font-semibold text-base focus:outline-none focus:border-blue-500 transition" aria-label="Cena nieruchomości">
+              <input type="text" id="priceInput" value="750 000" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-3.5 pr-14 py-2.5 text-white font-semibold text-base focus:outline-none focus:border-blue-500 transition" aria-label="Cena nieruchomości">
               <span class="absolute right-3.5 top-3 text-slate-400 text-sm font-medium pointer-events-none">zł</span>
             </div>
             <input type="range" id="priceRange" min="100000" max="2000000" step="10000" value="750000" class="w-full mt-2" aria-label="Suwak ceny nieruchomości">
           </div>
 
           <!-- Koszty początkowe -->
-          <div class="space-y-3 pt-3 border-t border-slate-800/60">
+          <div class="space-y-3 pt-3 border-t border-slate-800/80">
             <h3 class="text-sm font-medium text-slate-300">Koszty początkowe</h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               
               <!-- Podatek PCC -->
-              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-1">
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/80 space-y-1">
                 <div class="flex justify-between items-center text-xs mb-1">
                   <label class="font-medium text-slate-300">PCC (2%)</label>
                   <label class="flex items-center gap-1.5 cursor-pointer">
@@ -163,7 +169,7 @@
               </div>
 
               <!-- Koszty notarialne -->
-              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/80 space-y-2">
                 <div class="flex justify-between items-center text-xs">
                   <label class="font-medium text-slate-300">Koszty notarialne</label>
                   <label class="flex items-center gap-1.5 cursor-pointer">
@@ -173,7 +179,7 @@
                   </label>
                 </div>
                 <div class="relative">
-                  <input type="text" id="costNotaryInput" readonly class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition read-only:bg-slate-900/80 read-only:text-slate-300" aria-label="Koszty notarialne">
+                  <input type="text" id="costNotaryInput" readonly class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition read-only:bg-slate-900/80 read-only:text-slate-300" aria-label="Koszty notarialne">
                   <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">zł</span>
                 </div>
                 <div class="text-[10px] text-slate-400 leading-tight">
@@ -182,28 +188,28 @@
               </div>
 
               <!-- Prowizja pośrednika -->
-              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/80 space-y-2">
                 <div class="flex justify-between items-center text-xs">
                   <label class="font-medium text-slate-400">Prowizja pośrednika (brutto)</label>
-                  <div class="inline-flex rounded bg-slate-900 p-0.5 border border-slate-700 text-[10px]">
+                  <div class="inline-flex rounded bg-slate-900 p-0.5 border border-slate-700/80 text-[10px]">
                     <button type="button" id="toggleAgentPct" onclick="setCostMode('agent', 'pct')" class="px-1.5 py-0.5 rounded font-medium text-white bg-blue-600 transition" aria-label="Prowizja pośrednika w procentach">%</button>
                     <button type="button" id="toggleAgentPln" onclick="setCostMode('agent', 'pln')" class="px-1.5 py-0.5 rounded font-medium text-slate-400 hover:text-white transition" aria-label="Prowizja pośrednika w złotówkach">zł</button>
                   </div>
                 </div>
                 <div class="relative">
-                  <input type="text" id="costAgentInput" value="2,5" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Wartość prowizji pośrednika">
+                  <input type="text" id="costAgentInput" value="2,5" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Wartość prowizji pośrednika">
                   <span id="agentUnitSuffix" class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">%</span>
                 </div>
                 <input type="range" id="costAgentRange" min="0" max="5" step="0.1" value="2.5" class="w-full mt-1" aria-label="Suwak prowizji pośrednika">
               </div>
 
               <!-- Remont i wyposażenie -->
-              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/80 space-y-2">
                 <div class="flex justify-between items-center text-xs">
                   <label class="font-medium text-slate-400">Remont, wyposażenie, wycena, inne</label>
                 </div>
                 <div class="relative">
-                  <input type="text" id="costRehabInput" value="10 000" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Koszty remontu i wyposażenia">
+                  <input type="text" id="costRehabInput" value="10 000" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Koszty remontu i wyposażenia">
                   <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">zł</span>
                 </div>
                 <input type="range" id="costRehabRange" min="0" max="100000" step="1000" value="10000" class="w-full mt-1" aria-label="Suwak kosztów remontu">
@@ -215,7 +221,7 @@
             </div>
             
             <!-- SUMA ZAINWESTOWANEJ GOTÓWKI -->
-            <div class="p-3 mt-3 rounded-xl bg-slate-800/50 border border-slate-700 flex justify-between items-center">
+            <div class="p-3 mt-3 rounded-xl bg-slate-900/60 border border-slate-800/80 flex justify-between items-center">
               <div>
                 <span class="text-sm font-medium text-slate-300 block">Suma zainwestowanej gotówki:</span>
                 <span id="summaryInitialCostsSubtext" class="text-[11px] text-slate-400 block"></span>
@@ -225,52 +231,52 @@
           </div>
 
           <!-- Parametry kredytu -->
-          <div class="space-y-3 pt-3 border-t border-slate-800/60">
+          <div class="space-y-3 pt-3 border-t border-slate-800/80">
             <h3 class="text-sm font-medium text-slate-300">Parametry kredytu</h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <!-- Wkład Własny -->
-              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/80 space-y-2">
                 <div class="flex justify-between items-center text-xs">
                   <label class="font-medium text-slate-400">Wkład własny</label>
-                  <div class="inline-flex rounded bg-slate-900 p-0.5 border border-slate-700 text-[10px]">
+                  <div class="inline-flex rounded bg-slate-900 p-0.5 border border-slate-700/80 text-[10px]">
                     <button type="button" id="toggleDpPct" onclick="setCostMode('dp', 'pct')" class="px-1.5 py-0.5 rounded font-medium text-white bg-blue-600 transition" aria-label="Wkład własny w procentach">%</button>
                     <button type="button" id="toggleDpPln" onclick="setCostMode('dp', 'pln')" class="px-1.5 py-0.5 rounded font-medium text-slate-400 hover:text-white transition" aria-label="Wkład własny w złotówkach">zł</button>
                   </div>
                 </div>
                 <div class="relative">
-                  <input type="text" id="costDpInput" value="20" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Wartość wkładu własnego">
+                  <input type="text" id="costDpInput" value="20" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Wartość wkładu własnego">
                   <span id="dpUnitSuffix" class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">%</span>
                 </div>
                 <input type="range" id="costDpRange" min="0" max="100" step="1" value="20" class="w-full mt-1" aria-label="Suwak wkładu własnego">
               </div>
 
               <!-- Okres kredytowania -->
-              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/80 space-y-2">
                 <div class="flex justify-between items-center text-xs">
                   <label class="font-medium text-slate-400">Okres kredytowania</label>
                 </div>
                 <div class="relative">
-                  <input type="text" id="termInput" value="25" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Okres kredytowania">
+                  <input type="text" id="termInput" value="25" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-2.5 pr-10 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Okres kredytowania">
                   <span id="termUnitSuffix" class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">lat</span>
                 </div>
                 <input type="range" id="termRange" min="5" max="35" step="1" value="25" class="w-full mt-1" aria-label="Suwak okresu kredytowania">
               </div>
 
               <!-- Oprocentowanie -->
-              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2">
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/80 space-y-2">
                 <div class="flex justify-between items-center text-xs">
                   <label class="font-medium text-slate-400">Oprocentowanie kredytu</label>
                 </div>
                 <div class="relative">
-                  <input type="text" id="interestInput" value="5,5" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-8 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Oprocentowanie kredytu">
+                  <input type="text" id="interestInput" value="5,5" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-2.5 pr-8 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Oprocentowanie kredytu">
                   <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">%</span>
                 </div>
                 <input type="range" id="interestRange" min="0" max="15" step="0.1" value="5.5" class="w-full mt-1" aria-label="Suwak oprocentowania">
               </div>
 
               <!-- Rata kredytu -->
-              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-1 flex flex-col justify-between">
+              <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-800/80 space-y-1 flex flex-col justify-between">
                 <div>
                   <div class="flex justify-between items-center text-xs mb-1">
                     <label class="font-medium text-slate-300">Rata kredytu</label>
@@ -287,14 +293,14 @@
           </div>
 
           <!-- Parametry wynajmu -->
-          <div class="space-y-4 pt-3 border-t border-slate-800/60">
+          <div class="space-y-4 pt-3 border-t border-slate-800/80">
             <h3 class="text-sm font-medium text-slate-300">Parametry wynajmu</h3>
             
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs text-slate-400 mb-1">Czynsz najmu</label>
                 <div class="relative">
-                  <input type="text" id="advRent" value="4 600" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-16 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Miesięczny czynsz najmu">
+                  <input type="text" id="advRent" value="4 600" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-2.5 pr-16 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Miesięczny czynsz najmu">
                   <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">zł/mc</span>
                 </div>
                 <input type="range" id="advRentRange" min="1000" max="7000" step="100" value="4600" class="w-full mt-2" aria-label="Suwak czynszu">
@@ -306,7 +312,7 @@
               <div>
                 <label class="block text-xs text-slate-400 mb-1">Pustostan</label>
                 <div class="relative">
-                  <input type="text" id="advVacancy" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-16 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Pustostan w miesiącach">
+                  <input type="text" id="advVacancy" value="1" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-2.5 pr-16 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Pustostan w miesiącach">
                   <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">mc/rok</span>
                 </div>
                 <input type="range" id="advVacancyRange" min="0" max="12" step="0.5" value="1" class="w-full mt-2" aria-label="Suwak pustostanu">
@@ -318,7 +324,7 @@
               <div class="col-span-2 sm:col-span-1">
                 <label class="block text-xs text-slate-400 mb-1">Podatek od najmu</label>
                 <div class="relative">
-                  <input type="text" id="advTax" value="8,5" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-8 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Stawka podatku od najmu">
+                  <input type="text" id="advTax" value="8,5" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-2.5 pr-8 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Stawka podatku od najmu">
                   <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">%</span>
                 </div>
                 <input type="range" id="advTaxRange" min="0" max="20" step="0.5" value="8.5" class="w-full mt-2" aria-label="Suwak podatku">
@@ -330,7 +336,7 @@
               <div class="col-span-2 sm:col-span-1">
                 <label class="block text-xs text-slate-400 mb-1">Fundusz rezerwowy</label>
                 <div class="relative">
-                  <input type="text" id="advFund" value="150" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-16 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Fundusz rezerwowy">
+                  <input type="text" id="advFund" value="150" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-2.5 pr-16 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" aria-label="Fundusz rezerwowy">
                   <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs pointer-events-none">zł/mc</span>
                 </div>
                 <input type="range" id="advFundRange" min="0" max="500" step="10" value="150" class="w-full mt-2" aria-label="Suwak funduszu rezerwowego">
@@ -341,10 +347,10 @@
             </div>
 
             <!-- Dochód z najmu netto -->
-            <div id="netIncomeContainer" class="p-4 sm:p-5 rounded-xl bg-slate-800/50 border border-slate-700 mt-4 transition-colors">
+            <div id="netIncomeContainer" class="p-4 sm:p-5 rounded-xl bg-slate-800/40 border border-white/10 mt-4 transition-colors">
               <div class="flex justify-between items-center mb-1">
                 <label class="font-medium text-slate-200 text-sm sm:text-base">Dochód z najmu netto</label>
-                <div class="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-700 text-xs">
+                <div class="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-700/80 text-xs">
                   <button type="button" id="toggleIncomeMo" onclick="setIncomeMode('mo')" class="px-2 py-0.5 rounded-md font-medium text-white bg-blue-600 transition" aria-label="Wyświetl miesięcznie">mc</button>
                   <button type="button" id="toggleIncomeYr" onclick="setIncomeMode('yr')" class="px-2 py-0.5 rounded-md font-medium text-slate-400 hover:text-white transition" aria-label="Wyświetl rocznie">rok</button>
                 </div>
@@ -383,7 +389,7 @@
       <div class="lg:col-span-6 space-y-4">
         
         <!-- Tile 1: Wartość mieszkania po okresie inwestycji + Roczny wzrost -->
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-700 space-y-3 relative overflow-hidden">
+        <div class="glass-card rounded-2xl p-4 sm:p-5 space-y-3 relative overflow-hidden">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="space-y-1">
               <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
@@ -399,7 +405,7 @@
               <div class="flex justify-between items-center text-xs gap-2">
                 <label for="appreciationInput" class="font-medium text-slate-300">Wzrost wartości</label>
                 <div class="relative shrink-0">
-                  <input type="text" id="appreciationInput" value="2,00" class="w-24 bg-slate-900 border border-slate-700 rounded-lg pl-2 pr-[49px] py-0.5 text-right text-white font-semibold text-xs focus:outline-none focus:border-blue-500 transition" aria-label="Przewidywany wzrost wartości nieruchomości">
+                  <input type="text" id="appreciationInput" value="2,00" class="w-24 bg-slate-900 border border-slate-700/80 rounded-lg pl-2 pr-[49px] py-0.5 text-right text-white font-semibold text-xs focus:outline-none focus:border-blue-500 transition" aria-label="Przewidywany wzrost wartości nieruchomości">
                   <span class="absolute right-2 top-0.5 text-slate-400 text-[11px] font-medium pointer-events-none">% / rok</span>
                 </div>
               </div>
@@ -412,7 +418,7 @@
         </div>
 
         <!-- Tile 2: Zysk po całym okresie -->
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-700 space-y-3 relative overflow-hidden">
+        <div class="glass-card rounded-2xl p-4 sm:p-5 space-y-3 relative overflow-hidden">
           <div class="flex items-center justify-between gap-3 flex-wrap">
             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
               Zysk po całym okresie (<span id="profitTermDisplay" class="text-slate-200">25 lat</span>)
@@ -423,7 +429,7 @@
           </div>
 
           <!-- Co to znaczy? -->
-          <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-1 text-xs">
+          <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 space-y-1 text-xs">
             <span class="font-semibold text-blue-400 block">Co to znaczy?</span>
             <p class="text-slate-300 leading-relaxed text-[11px]" id="profitExplanationText">
               <!-- dynamicznie generowany tekst -->
@@ -432,10 +438,10 @@
         </div>
 
         <!-- Tile 3: Roczna rentowność -->
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-700 space-y-3 relative overflow-hidden">
+        <div class="glass-card rounded-2xl p-4 sm:p-5 space-y-3 relative overflow-hidden">
           <div class="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-800/80">
             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Roczna rentowność</span>
-            <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">
+            <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800/80">
               <span class="text-[11px] text-slate-300 font-medium">Uwzględniaj wzrost wartości</span>
               <input type="checkbox" id="includeAppToggle" onchange="toggleIncludeApp()" class="sr-only peer" aria-label="Uwzględniaj wzrost wartości">
               <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600 relative"></div>
@@ -447,7 +453,7 @@
             <div class="bg-slate-900/60 p-3 rounded-xl border border-indigo-500/70 shadow-[0_0_15px_rgba(99,102,241,0.25)] flex flex-col justify-start">
               <div class="flex justify-between items-start gap-1">
                 <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Rentowność najmu</span>
-                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 font-medium shrink-0">netto</span>
+                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700/80 font-medium shrink-0">netto</span>
               </div>
               <div class="flex items-baseline my-0.5">
                 <span id="roiYieldSubValue" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0,00%</span>
@@ -462,7 +468,7 @@
             <div class="bg-slate-900/60 p-3 rounded-xl border border-indigo-500/70 shadow-[0_0_15px_rgba(99,102,241,0.25)] flex flex-col justify-start">
               <div class="flex justify-between items-start gap-1">
                 <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Odpowiednik lokaty</span>
-                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 font-medium shrink-0">brutto</span>
+                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700/80 font-medium shrink-0">brutto</span>
               </div>
               <div class="flex items-baseline my-0.5">
                 <span id="roiBruttoSubValue" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0,00%</span>
@@ -475,7 +481,7 @@
           </div>
 
           <!-- Co to znaczy? -->
-          <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-1 text-xs">
+          <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 space-y-1 text-xs">
             <span class="font-semibold text-blue-400 block">Co to znaczy?</span>
             <p class="text-slate-300 leading-relaxed text-[11px]" id="roiExplanationText">
               <!-- dynamicznie generowany tekst -->
@@ -484,12 +490,12 @@
         </div>
 
         <!-- Tile 4: Alternatywa dla tej inwestycji -->
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-700 space-y-3 relative overflow-hidden">
+        <div class="glass-card rounded-2xl p-4 sm:p-5 space-y-3 relative overflow-hidden">
           <div class="flex items-center justify-between gap-3 flex-wrap">
             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Alternatywa dla tej inwestycji</span>
             
             <!-- Toggle ETF vs Lokata -->
-            <div class="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-700 text-[11px]">
+            <div class="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-700/80 text-[11px]">
               <button type="button" id="btnAltEtf" onclick="setAltType('etf')" class="px-2 py-0.5 rounded-md font-medium text-white bg-blue-600 transition" aria-label="Alternatywa: ETF">
                 ETF
               </button>
@@ -505,7 +511,7 @@
             <div class="bg-slate-900/60 p-3 rounded-xl border border-indigo-500/70 shadow-[0_0_15px_rgba(99,102,241,0.25)] flex flex-col justify-start">
               <div class="flex justify-between items-start gap-1">
                 <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Inwestycja zarabia</span>
-                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 font-medium shrink-0">netto</span>
+                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700/80 font-medium shrink-0">netto</span>
               </div>
               <div class="flex items-baseline my-0.5">
                 <span id="cagrNetValueDisplay" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0,00%</span>
@@ -520,7 +526,7 @@
             <div class="bg-slate-900/60 p-3 rounded-xl border border-indigo-500/70 shadow-[0_0_15px_rgba(99,102,241,0.25)] flex flex-col justify-start">
               <div class="flex justify-between items-start gap-1">
                 <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider" id="altCardTitle">Wymagany ETF</span>
-                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 font-medium shrink-0">brutto</span>
+                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700/80 font-medium shrink-0">brutto</span>
               </div>
               <div class="flex items-baseline my-0.5">
                 <span id="cagrGrossValue" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0,00%</span>
@@ -533,19 +539,19 @@
           </div>
 
           <!-- Co to znaczy? -->
-          <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-1 text-xs">
+          <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 space-y-1 text-xs">
             <span class="font-semibold text-blue-400 block">Co to znaczy?</span>
             <p class="text-slate-300 leading-relaxed text-[11px]" id="cagrExplanationText">
               <!-- dynamicznie generowany tekst -->
             </p>
-            <div id="cagrTaxNote" class="text-[10px] text-slate-400 pt-1 border-t border-slate-800/60 mt-1">
+            <div id="cagrTaxNote" class="text-[10px] text-slate-400 pt-1 border-t border-slate-800/80 mt-1">
               Podatek Belki: wyliczony dla ETF akumulującego (podatek 19% pobierany jednorazowo przy wyjściu).
             </div>
           </div>
         </div>
 
         <!-- Ryzyka i Disclaimer -->
-        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400 space-y-2 leading-relaxed">
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80 text-xs text-slate-400 space-y-2 leading-relaxed">
           <div class="text-amber-400 font-bold text-xs">
             <span>Ryzyka i ograniczenia modelu:</span>
           </div>
@@ -749,7 +755,6 @@
     }
 
     function syncControlsFromState() {
-      // 1. Odtworzenie UI dla trybów costModes (% vs PLN/zł), ich jednostek oraz zakresów i kroków suwaków
       ['dp', 'agent'].forEach(key => {
         const mode = costModes[key] || 'pct';
         const btnPct = document.getElementById(`toggle${capitalize(key)}Pct`);
@@ -779,7 +784,6 @@
         }
       });
 
-      // 2. Synchronizacja pozycji suwaków na podstawie aktualnych wartości pól tekstowych
       const inputRangeMap = [
         ['priceInput', 'priceRange'],
         ['costDpInput', 'costDpRange'],
@@ -1041,13 +1045,13 @@
         if (isNegativeMargin) {
           if (marginEl) marginEl.className = "text-xl font-bold text-red-400 tracking-tight";
           if (marginPctEl) marginPctEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 font-semibold tracking-wide";
-          if (netContainer) netContainer.className = "p-4 sm:p-5 rounded-xl bg-red-950/20 border border-red-900/50 mt-4 transition-colors";
+          if (netContainer) netContainer.className = "p-4 sm:p-5 rounded-xl bg-red-950/20 border border-red-500/30 mt-4 transition-colors";
           if (netInfoBox) netInfoBox.className = "text-[11px] text-red-300/90 flex items-start gap-1.5 leading-relaxed bg-red-500/10 p-2.5 rounded-lg border border-red-500/20 mt-2";
           if (incomeInfoText) incomeInfoText.innerHTML = MSG_NEGATIVE_MARGIN_HTML;
         } else {
           if (marginEl) marginEl.className = "text-xl font-bold text-emerald-400 tracking-tight";
           if (marginPctEl) marginPctEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold tracking-wide";
-          if (netContainer) netContainer.className = "p-4 sm:p-5 rounded-xl bg-slate-800/50 border border-slate-700 mt-4 transition-colors";
+          if (netContainer) netContainer.className = "p-4 sm:p-5 rounded-xl bg-slate-800/40 border border-white/10 mt-4 transition-colors";
           if (netInfoBox) netInfoBox.className = "text-[11px] text-emerald-300/90 flex items-start gap-1.5 leading-relaxed bg-emerald-500/10 p-2.5 rounded-lg border border-emerald-500/20 mt-2";
           if (incomeInfoText) incomeInfoText.innerText = MSG_DEFAULT_MARGIN_INFO;
         }
